@@ -1,4 +1,7 @@
 from models import get_session, Category, Wine
+from models import initialize_db
+
+initialize_db() 
 
 # Main menu function
 def main_menu():
