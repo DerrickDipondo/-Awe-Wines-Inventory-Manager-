@@ -1,3 +1,28 @@
+from models import get_session, Category, Wine
+
+# CLI Functions
+def main_menu():
+    print("\n=== Awe Wines Inventory Management ===")
+    print("1. Manage Categories")
+    print("2. Manage Wines")
+    print("3. Exit")
+
+def category_menu():
+    print("\n=== Category Menu ===")
+    print("1. Create Category")
+    print("2. Delete Category")
+    print("3. Display All Categories")
+    print("4. Find Category by ID")
+    print("5. Back")
+
+def wine_menu():
+    print("\n=== Wine Menu ===")
+    print("1. Create Wine")
+    print("2. Delete Wine")
+    print("3. Display All Wines")
+    print("4. Find Wine by ID")
+    print("5. Back")
+
 from models import get_session, Category, Wine, IntegrityError, ValueError
 
 # ... (keep existing menu functions unchanged) ...
