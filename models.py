@@ -1,8 +1,9 @@
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.exc import IntegrityError
 
-# SQLAlchemy Setup
+# Setup SQLAlchemy
 Base = declarative_base()
 engine = create_engine('sqlite:///inventory.db')
 Base.metadata.create_all(engine)
@@ -11,19 +12,23 @@ Session = sessionmaker(bind=engine)
 def get_session():
     return Session()
 
-# Category Section
+# Model: Category
 class Category(Base):
     __tablename__ = 'categories'
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    name = Column(String, nullable=False, unique=True)
     wines = relationship("Wine", back_populates="category")
 
     @classmethod
     def create(cls, session, name):
         category = cls(name=name)
         session.add(category)
-        session.commit()
-        return category
+        try:
+            session.commit()
+            return category
+        except IntegrityError:
+            session.rollback()
+            raise ValueError("Category name already exists.")
 
     @classmethod
     def delete(cls, session, id):
@@ -49,7 +54,7 @@ class Category(Base):
 class Wine(Base):
     __tablename__ = 'wines'
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    name = Column(String, nullable=False, unique=True)
     category_id = Column(Integer, ForeignKey('categories.id'))
     category = relationship("Category", back_populates="wines")
 
@@ -57,8 +62,12 @@ class Wine(Base):
     def create(cls, session, name, category_id):
         wine = cls(name=name, category_id=category_id)
         session.add(wine)
-        session.commit()
-        return wine
+        try:
+            session.commit()
+            return wine
+        except IntegrityError:
+            session.rollback()
+            raise ValueError("Wine name already exists.")
 
     @classmethod
     def delete(cls, session, id):
