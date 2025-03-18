@@ -1,21 +1,28 @@
 from models import get_session, Category, Wine
 
-# CLI Functions
+# Main menu function
 def main_menu():
+    """Display the main menu options."""
     print("\n=== Awe Wines Inventory Management ===")
     print("1. Manage Categories")
     print("2. Manage Wines")
     print("3. Exit")
+    print("4. Seed Initial Data")
 
+# Category menu function
 def category_menu():
+    """Display the category menu options."""
     print("\n=== Category Menu ===")
     print("1. Create Category")
     print("2. Delete Category")
     print("3. Display All Categories")
     print("4. Find Category by ID")
-    print("5. Back")
+    print("5. View Wines by Category")
+    print("6. Back")
 
+# Wine menu function
 def wine_menu():
+    """Display the wine menu options."""
     print("\n=== Wine Menu ===")
     print("1. Create Wine")
     print("2. Delete Wine")
@@ -23,20 +30,17 @@ def wine_menu():
     print("4. Find Wine by ID")
     print("5. Back")
 
-from models import get_session, Category, Wine, IntegrityError, ValueError
-
-# ... (keep existing menu functions unchanged) ...
-
 def run_cli():
+    """Run the command-line interface for inventory management."""
     session = get_session()
     while True:
         main_menu()
-        choice = input("Enter your choice (1-3): ").strip()
+        choice = input("Enter your choice (1-4): ").strip()
         
         if choice == "1":
             while True:
                 category_menu()
-                sub_choice = input("Enter your choice (1-5): ").strip()
+                sub_choice = input("Enter your choice (1-6): ").strip()
                 
                 if sub_choice == "1":
                     name = input("Enter category name: ").strip()
@@ -73,6 +77,19 @@ def run_cli():
                         print("Error: ID must be a number.")
                 
                 elif sub_choice == "5":
+                    id = input("Enter category ID to view wines: ").strip()
+                    if id.isdigit():
+                        category = Category.find_by_id(session, int(id))
+                        if category and category.wines:
+                            print(f"Wines in Category {id} ({category.name}):")
+                            for wine in category.wines:
+                                print(wine)
+                        else:
+                            print("No wines found or category not found.")
+                    else:
+                        print("Error: ID must be a number.")
+                
+                elif sub_choice == "6":
                     break
                 else:
                     print("Invalid choice. Try again.")
@@ -129,8 +146,20 @@ def run_cli():
         elif choice == "3":
             print("Exiting...")
             break
-        else:
-            print("Invalid choice. Try again.")
+        
+        elif choice == "4":
+            try:
+                Category.create(session, "Red Wine")
+                Category.create(session, "White Wine")
+                Wine.create(session, "Merlot", 1)
+                Wine.create(session, "Chardonnay", 2)
+                print("Seed data added successfully.")
+            except ValueError as e:
+                session.rollback()
+                print(f"Error seeding data: {e}")
+            except Exception as e:
+                session.rollback()
+                print(f"Unexpected error: {e}")
     
     session.close()
 
