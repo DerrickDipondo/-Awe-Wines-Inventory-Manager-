@@ -1,5 +1,6 @@
-from models import get_session, Category, Wine
-from models import initialize_db
+from lib.db.models import get_session, Category, Wine
+from lib.db.models import initialize_db
+from lib.helpers import main_menu, category_menu, wine_menu
 
 initialize_db() 
 
@@ -133,13 +134,9 @@ def run_cli():
                     else:
                         print("No wines found.")
                 
-                elif sub_choice == "4":
-                    id = input("Enter wine ID: ").strip()
-                    if id.isdigit():
-                        wine = Wine.find_by_id(session, int(id))
-                        print(wine if wine else "Wine not found.")
-                    else:
-                        print("Error: ID must be a number.")
+                elif choice == "4":
+                    from lib.db.seed import seed_data
+                    seed_data()
                 
                 elif sub_choice == "5":
                     break
@@ -151,18 +148,8 @@ def run_cli():
             break
         
         elif choice == "4":
-            try:
-                Category.create(session, "Red Wine")
-                Category.create(session, "White Wine")
-                Wine.create(session, "Merlot", 1)
-                Wine.create(session, "Chardonnay", 2)
-                print("Seed data added successfully.")
-            except ValueError as e:
-                session.rollback()
-                print(f"Error seeding data: {e}")
-            except Exception as e:
-                session.rollback()
-                print(f"Unexpected error: {e}")
+          from lib.db.seed import seed_data
+          seed_data()
     
     session.close()
 
